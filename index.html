@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ta">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2a1f14">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Kural">
+    <meta name="description" content="A kural a day from Thiruvalluvar's timeless Thirukkural">
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=Noto+Sans+Tamil:wght@400;500&display=swap"
+        rel="stylesheet">
+    <title>Thirukkural Daily</title>
+    <style>
+        :root {
+            --parchment: #f5f0e8;
+            --parchment-mid: #ede5d0;
+            --parchment-dark: #d9cdb8;
+            --ink: #2a1f14;
+            --ink-mid: #4a3828;
+            --ink-faded: #7a6655;
+            --accent: #8b1a1a;
+            --accent-soft: #c4a882;
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bot: env(safe-area-inset-bottom, 0px);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            height: 100%;
+        }
+
+        body {
+            min-height: 100dvh;
+            background: var(--parchment-dark);
+            background-image:
+                radial-gradient(ellipse at 20% 10%, rgba(139, 26, 26, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 90%, rgba(42, 31, 20, 0.08) 0%, transparent 60%);
+            font-family: 'Lora', Georgia, serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: calc(var(--safe-top) + 1.5rem) 1rem calc(var(--safe-bot) + 1.5rem);
+            gap: 1rem;
+        }
+
+        .topbar {
+            width: 100%;
+            max-width: 620px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            opacity: 0;
+            animation: fadeUp .6s ease forwards .05s;
+        }
+
+        .app-wordmark {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.05rem;
+            color: var(--ink-mid);
+            letter-spacing: .02em;
+        }
+
+        .topbar-actions {
+            display: flex;
+            gap: .5rem;
+        }
+
+        .icon-btn {
+            background: rgba(245, 240, 232, 0.55);
+            border: 1px solid var(--accent-soft);
+            color: var(--ink-faded);
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: .85rem;
+            transition: background .2s, color .2s;
+            backdrop-filter: blur(6px);
+        }
+
+        .icon-btn:hover,
+        .icon-btn.active {
+            background: var(--ink);
+            color: var(--parchment);
+            border-color: var(--ink);
+        }
+
+        .icon-btn svg {
+            width: 15px;
+            height: 15px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .date-strip {
+            font-family: 'Lora', serif;
+            font-style: italic;
+            font-size: .78rem;
+            letter-spacing: .12em;
+            color: var(--ink-faded);
+            text-transform: uppercase;
+            opacity: 0;
+            animation: fadeUp .6s ease forwards .1s;
+        }
+
+        .card {
+            background: var(--parchment);
+            width: 100%;
+            max-width: 620px;
+            border-radius: 3px;
+            padding: 2.8rem 2.8rem 2.2rem;
+            box-shadow: 0 1px 2px rgba(42, 31, 20, .13), 0 6px 20px rgba(42, 31, 20, .13), 0 18px 50px rgba(42, 31, 20, .07), inset 0 1px 0 rgba(255, 255, 255, .65);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(18px);
+            animation: fadeUp .85s cubic-bezier(.16, 1, .3, 1) forwards .2s;
+            transition: opacity .3s ease, transform .3s ease;
+        }
+
+        .card::after {
+            content: '✦';
+            position: absolute;
+            top: 1rem;
+            right: 1.3rem;
+            font-size: .5rem;
+            color: var(--accent-soft);
+            letter-spacing: .3em;
+        }
+
+        .kural-header {
+            display: flex;
+            align-items: baseline;
+            gap: .85rem;
+            margin-bottom: 1rem;
+        }
+
+        .kural-number {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.85rem;
+            color: var(--ink);
+            line-height: 1;
+        }
+
+        .kural-chapter {
+            font-family: 'Lora', serif;
+            font-size: .72rem;
+            color: var(--ink-faded);
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            font-style: italic;
+        }
+
+        hr.rule {
+            border: none;
+            border-top: 1px solid var(--accent-soft);
+            margin-bottom: 1.8rem;
+        }
+
+        .section-label {
+            font-family: 'Lora', serif;
+            font-size: .64rem;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--ink-faded);
+            margin-bottom: .55rem;
+        }
+
+        .english-verse {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--ink);
+            margin-bottom: 1.8rem;
+        }
+
+        .tamil-verse {
+            font-family: 'Noto Sans Tamil', sans-serif;
+            font-size: 1.05rem;
+            line-height: 2;
+            color: var(--ink);
+            margin-bottom: 1.8rem;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: .8rem;
+            margin: 1.4rem 0;
+            color: var(--accent-soft);
+            font-size: .55rem;
+            letter-spacing: .4em;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-top: 1px solid var(--parchment-mid);
+        }
+
+        .meaning {
+            font-family: 'Lora', serif;
+            font-size: .9rem;
+            line-height: 1.9;
+            color: var(--ink-mid);
+            border-left: 2px solid var(--accent-soft);
+            padding-left: 1.1rem;
+            font-style: italic;
+        }
+
+        .card-footer {
+            margin-top: 2rem;
+            padding-top: 1.1rem;
+            border-top: 1px solid var(--parchment-mid);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .athikaram-tag {
+            font-family: 'Noto Sans Tamil', sans-serif;
+            font-size: .72rem;
+            color: var(--ink-faded);
+            flex-shrink: 0;
+        }
+
+        .footer-actions {
+            display: flex;
+            align-items: center;
+            gap: .65rem;
+        }
+
+        .text-btn {
+            background: none;
+            border: none;
+            font-family: 'Lora', serif;
+            font-style: italic;
+            font-size: .75rem;
+            color: var(--ink-faded);
+            cursor: pointer;
+            letter-spacing: .04em;
+            transition: color .2s;
+            padding: 0;
+        }
+
+        .text-btn:hover {
+            color: var(--accent);
+        }
+
+        .nav-pair {
+            display: flex;
+            gap: .35rem;
+        }
+
+        .nav-btn {
+            background: none;
+            border: 1px solid var(--accent-soft);
+            color: var(--ink-faded);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: .85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .2s, color .2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--ink);
+            color: var(--parchment);
+            border-color: var(--ink);
+        }
+
+        .progress-strip {
+            width: 100%;
+            max-width: 620px;
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            opacity: 0;
+            animation: fadeUp .6s ease forwards .45s;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 2px;
+            background: rgba(42, 31, 20, .15);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 2px;
+            transition: width .5s cubic-bezier(.16, 1, .3, 1);
+        }
+
+        .progress-text {
+            font-family: 'Lora', serif;
+            font-style: italic;
+            font-size: .7rem;
+            color: var(--ink-faded);
+            white-space: nowrap;
+        }
+
+        .banner {
+            width: 100%;
+            max-width: 620px;
+            border-radius: 3px;
+            padding: .85rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            font-family: 'Lora', serif;
+            font-size: .82rem;
+            animation: slideUp .5s cubic-bezier(.16, 1, .3, 1) forwards;
+        }
+
+        .banner.hidden {
+            display: none;
+        }
+
+        .banner-dark {
+            background: var(--ink);
+            color: var(--parchment);
+            box-shadow: 0 4px 16px rgba(42, 31, 20, .25);
+        }
+
+        .banner-light {
+            background: rgba(245, 240, 232, .85);
+            border: 1px solid var(--accent-soft);
+            color: var(--ink-mid);
+            backdrop-filter: blur(8px);
+        }
+
+        .banner p {
+            flex: 1;
+            line-height: 1.5;
+            font-style: italic;
+        }
+
+        .banner p span {
+            display: block;
+            font-size: .7rem;
+            color: var(--accent-soft);
+            margin-top: .1rem;
+            font-style: normal;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+
+        .btn-ok,
+        .btn-no {
+            background: none;
+            border: 1px solid rgba(245, 240, 232, .3);
+            color: var(--parchment);
+            padding: .35rem .85rem;
+            border-radius: 2px;
+            cursor: pointer;
+            font-family: 'Lora', serif;
+            font-size: .78rem;
+            transition: background .2s;
+            white-space: nowrap;
+        }
+
+        .btn-ok {
+            background: rgba(245, 240, 232, .12);
+        }
+
+        .btn-ok:hover {
+            background: rgba(245, 240, 232, .25);
+        }
+
+        .btn-no {
+            border-color: transparent;
+            color: var(--ink-faded);
+            font-size: .72rem;
+        }
+
+        .btn-ok-light {
+            background: none;
+            border: 1px solid var(--accent-soft);
+            padding: .3rem .75rem;
+            border-radius: 2px;
+            cursor: pointer;
+            font-family: 'Lora', serif;
+            font-size: .75rem;
+            color: var(--ink-mid);
+            transition: background .2s;
+            white-space: nowrap;
+        }
+
+        .btn-ok-light:hover {
+            background: var(--ink);
+            color: var(--parchment);
+            border-color: var(--ink);
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, var(--parchment-mid) 25%, var(--parchment) 50%, var(--parchment-mid) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+            border-radius: 3px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: calc(var(--safe-bot) + 1.5rem);
+            left: 50%;
+            transform: translateX(-50%) translateY(8px);
+            background: var(--ink);
+            color: var(--parchment);
+            padding: .45rem 1.1rem;
+            border-radius: 2px;
+            font-family: 'Lora', serif;
+            font-style: italic;
+            font-size: .78rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .25s, transform .25s;
+            white-space: nowrap;
+            z-index: 999;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 2rem 1.5rem 1.6rem;
+            }
+
+            .kural-number {
+                font-size: 1.5rem;
+            }
+
+            .english-verse {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="topbar">
+        <div class="app-wordmark">திருக்குறள்</div>
+        <div class="topbar-actions">
+            <button class="icon-btn" id="notifBtn" title="Daily reminder" onclick="askNotification()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+            </button>
+            <button class="icon-btn" title="Share" onclick="shareKural()">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="18" cy="5" r="3" />
+                    <circle cx="6" cy="12" r="3" />
+                    <circle cx="18" cy="19" r="3" />
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="date-strip" id="dateStrip">—</div>
+
+    <div class="card" id="card">
+        <div id="cardContent">
+            <div class="skeleton" style="height:1.8rem;width:40%;margin-bottom:.8rem;"></div>
+            <div class="skeleton" style="height:1px;width:100%;margin-bottom:1.6rem;"></div>
+            <div class="skeleton" style="height:1em;width:90%;margin-bottom:.5rem;"></div>
+            <div class="skeleton" style="height:1em;width:70%;margin-bottom:1.6rem;"></div>
+            <div class="skeleton" style="height:1em;width:100%;margin-bottom:.5rem;"></div>
+            <div class="skeleton" style="height:1em;width:85%;margin-bottom:1.6rem;"></div>
+            <div class="skeleton" style="height:3.5rem;width:100%;"></div>
+        </div>
+    </div>
+
+    <div class="progress-strip">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
+        <div class="progress-text" id="progressText">— / 1330</div>
+    </div>
+
+    <div class="banner banner-dark hidden" id="installBanner">
+        <p>Add to home screen<span>Read daily without opening a browser</span></p>
+        <button class="btn-ok" id="installOk">Add</button>
+        <button class="btn-no"
+            onclick="document.getElementById('installBanner').classList.add('hidden');localStorage.setItem('install_dismissed','1')">Later</button>
+    </div>
+
+    <div class="banner banner-light hidden" id="notifBanner">
+        <p>Get a kural every morning — a moment of stillness to start the day.</p>
+        <button class="btn-ok-light" onclick="enableNotifications()">Enable</button>
+        <button class="btn-no" onclick="dismissNotifBanner()">No thanks</button>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const TOTAL = 1330;
+        let currentNum = getDailyNum();
+        let cache = {};
+        let deferredInstall = null;
+
+        function getDailyNum() {
+            const today = new Date().toDateString();
+            if (localStorage.getItem('kural_date') === today) return +localStorage.getItem('kural_num') || 1;
+            const d = new Date();
+            const day = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 864e5);
+            const num = ((day * 137) % TOTAL) + 1;
+            localStorage.setItem('kural_date', today);
+            localStorage.setItem('kural_num', num);
+            return num;
+        }
+
+        async function fetchKural(num) {
+            if (cache[num]) return cache[num];
+            try {
+                const res = await fetch(`https://api-thirukkural.vercel.app/api?num=${num}`);
+                if (res.ok) { const d = await res.json(); cache[num] = d; return d; }
+            } catch (_) { }
+            return null;
+        }
+
+        function extract(data) {
+            if (data?.kural) {
+                const k = data.kural;
+                return {
+                    number: k.Number || k.number,
+                    chapter: data.chapter?.name || data.athikaram || '',
+                    chapterTa: data.chapter?.tamil || data.athikaram_tamil || '',
+                    line1: k.Line1 || k.line1 || '',
+                    line2: k.Line2 || k.line2 || '',
+                    verse: k.transliteration || k.Translation || k.translation || '',
+                    meaning: k.mk?.explanation || k.explanation || k.Translation || k.translation || ''
+                };
+            }
+            return {
+                number: data.number || 0,
+                chapter: data.athikaram || '',
+                chapterTa: data.athikaram_tamil || '',
+                line1: data.line1 || '',
+                line2: data.line2 || '',
+                verse: data.transliteration || data.translation || '',
+                meaning: data.explanation || data.translation || ''
+            };
+        }
+
+        function esc(s) {
+            return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function renderKural(data) {
+            const f = extract(data);
+            document.getElementById('cardContent').innerHTML = `
+                <div class="kural-header">
+                    <div class="kural-number">Thirukkural — ${f.number}</div>
+                    <div class="kural-chapter">${esc(f.chapter)}</div>
+                </div>
+                <hr class="rule">
+                <div class="section-label">The Verse</div>
+                <div class="english-verse">${esc(f.verse).replace(/\n/g, '<br>')}</div>
+                <div class="section-label">தமிழ் மூலம்</div>
+                <div class="tamil-verse">${esc(f.line1)}<br>${esc(f.line2)}</div>
+                <div class="divider">✦</div>
+                <div class="section-label">Meaning</div>
+                <div class="meaning">${esc(f.meaning)}</div>
+                <div class="card-footer">
+                    <span class="athikaram-tag">${esc(f.chapterTa || f.chapter)}</span>
+                    <div class="footer-actions">
+                        <button class="text-btn" onclick="copyKural()">Copy ✦</button>
+                        <div class="nav-pair">
+                            <button class="nav-btn" onclick="navigate(-1)">‹</button>
+                            <button class="nav-btn" onclick="navigate(1)">›</button>
+                        </div>
+                    </div>
+                </div>`;
+            document.getElementById('progressFill').style.width = `${(f.number / TOTAL * 100).toFixed(1)}%`;
+            document.getElementById('progressText').textContent = `${f.number} / ${TOTAL}`;
+        }
+
+        function renderError(num) {
+            document.getElementById('cardContent').innerHTML = `
+                <div style="text-align:center;padding:2.5rem 0;color:var(--ink-faded);font-style:italic;">
+                    <div style="font-size:1.5rem;margin-bottom:.6rem;">✦</div>
+                    Could not load Kural ${num}.<br>
+                    <button class="text-btn" style="margin-top:.8rem;" onclick="load(${num})">Try again</button>
+                </div>`;
+        }
+
+        async function load(num) {
+            currentNum = Math.max(1, Math.min(TOTAL, num));
+            const card = document.getElementById('card');
+            card.style.opacity = '.35';
+            card.style.transform = 'translateY(6px)';
+            const data = await fetchKural(currentNum);
+            requestAnimationFrame(() => {
+                if (data) renderKural(data); else renderError(currentNum);
+                card.style.transition = 'opacity .35s ease, transform .35s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+                setTimeout(() => card.style.transition = '', 400);
+            });
+        }
+
+        function navigate(dir) { load(currentNum + dir); }
+
+        function getCurrentText() {
+            const d = cache[currentNum]; if (!d) return '';
+            const f = extract(d);
+            return `Thirukkural ${f.number} — ${f.chapter}\n\n${f.line1}\n${f.line2}\n\n${f.verse}\n\n${f.meaning}\n\n— Thiruvalluvar`;
+        }
+
+        function copyKural() {
+            const t = getCurrentText(); if (!t) return;
+            navigator.clipboard.writeText(t).then(() => toast('Copied ✦'));
+        }
+
+        async function shareKural() {
+            const t = getCurrentText(); if (!t) return;
+            if (navigator.share) { try { await navigator.share({ title: `Thirukkural ${currentNum}`, text: t }); } catch (_) { } }
+            else copyKural();
+        }
+
+        function askNotification() {
+            if (Notification.permission === 'granted') { toast('Reminders already on ✦'); return; }
+            if (Notification.permission === 'denied') { toast('Enable notifications in browser settings'); return; }
+            document.getElementById('notifBanner').classList.remove('hidden');
+        }
+
+        async function enableNotifications() {
+            dismissNotifBanner();
+            const p = await Notification.requestPermission();
+            if (p === 'granted') {
+                document.getElementById('notifBtn').classList.add('active');
+                toast('Daily reminder enabled ✦');
+                setTimeout(() => new Notification('Thirukkural Daily', { body: "You're all set — your morning kural awaits each day.", icon: 'icons/icon-192.png' }), 1000);
+            } else { toast('Permission denied'); }
+        }
+
+        function dismissNotifBanner() {
+            document.getElementById('notifBanner').classList.add('hidden');
+            localStorage.setItem('notif_dismissed', '1');
+        }
+
+        function toast(msg) {
+            const el = document.getElementById('toast');
+            el.textContent = msg; el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 2200);
+        }
+
+        window.addEventListener('beforeinstallprompt', e => {
+            e.preventDefault(); deferredInstall = e;
+            if (!localStorage.getItem('install_dismissed')) document.getElementById('installBanner').classList.remove('hidden');
+            document.getElementById('installOk').onclick = async () => {
+                document.getElementById('installBanner').classList.add('hidden');
+                deferredInstall.prompt();
+                const { outcome } = await deferredInstall.userChoice;
+                if (outcome === 'accepted') toast('App installed ✦');
+                deferredInstall = null;
+            };
+        });
+
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+
+        document.getElementById('dateStrip').textContent =
+            new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+        if (Notification.permission === 'granted') document.getElementById('notifBtn').classList.add('active');
+        else if (Notification.permission !== 'denied' && !localStorage.getItem('notif_dismissed') && !localStorage.getItem('notif_seen')) {
+            setTimeout(() => { document.getElementById('notifBanner').classList.remove('hidden'); localStorage.setItem('notif_seen', '1'); }, 3500);
+        }
+
+        load(currentNum);
+    </script>
+</body>
+
+</html>
