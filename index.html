@@ -578,13 +578,42 @@
             return num;
         }
 
+        let allKurals = null;
+
+        async function loadAllKurals() {
+            if (allKurals) return allKurals;
+            const res = await fetch('https://raw.githubusercontent.com/tk120404/thirukkural/master/tamilData/db/thirukkural.json');
+            const data = await res.json();
+            allKurals = data;
+            return data;
+        }
+
         async function fetchKural(num) {
             if (cache[num]) return cache[num];
             try {
-                const res = await fetch(`https://api-thirukkural.vercel.app/api?num=${num}`);
-                if (res.ok) { const d = await res.json(); cache[num] = d; return d; }
-            } catch (_) { }
-            return null;
+                const data = await loadAllKurals();
+                // data is array, index is num-1
+                const k = data[num - 1];
+                if (!k) return null;
+                // Normalise into the shape extract() expects
+                const shaped = {
+                    kural: {
+                        Number: k.Number,
+                        Line1: k.Line1,
+                        Line2: k.Line2,
+                        Translation: k.Translation,
+                        mk: { explanation: k.mk?.explanation || k.explanation || '' }
+                    },
+                    chapter: { name: k.chapterGroup || k.section || '', tamil: k.chapterGroupTa || '' },
+                    athikaram: k.Chapter || '',
+                    athikaram_tamil: k.ChapterTa || ''
+                };
+                cache[num] = shaped;
+                return shaped;
+            } catch(e) {
+                console.error(e);
+                return null;
+            }
         }
 
         function extract(data) {
