@@ -2,11 +2,19 @@
   "name": "Thirukkural Daily",
   "short_name": "Kural",
   "description": "A kural a day from Thiruvalluvar's timeless Thirukkural",
-  "start_url": "/thirukkural/index.html",
+  "start_url": "/thirukkural/",
   "display": "standalone",
   "background_color": "#f5f0e8",
   "theme_color": "#2a1f14",
   "orientation": "portrait-primary",
   "categories": ["lifestyle", "education"],
-  "lang": "ta"
+  "lang": "ta",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }
