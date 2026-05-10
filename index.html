@@ -580,37 +580,31 @@
 
         let allKurals = null;
 
-        async function loadAllKurals() {
-            if (allKurals) return allKurals;
-            const res = await fetch('https://raw.githubusercontent.com/tk120404/thirukkural/master/tamilData/db/thirukkural.json');
-            const data = await res.json();
-            allKurals = data;
-            return data;
-        }
-
         async function fetchKural(num) {
             if (cache[num]) return cache[num];
             try {
-                const data = await loadAllKurals();
-                // data is array, index is num-1
-                const k = data[num - 1];
+                if (!allKurals) {
+                    const res = await fetch('https://raw.githubusercontent.com/tk120404/thirukkural/master/thirukkural.json');
+                    allKurals = await res.json();
+                }
+
+                const k = allKurals[num - 1];
                 if (!k) return null;
-                // Normalise into the shape extract() expects
-                const shaped = {
+
+                cache[num] = {
                     kural: {
                         Number: k.Number,
                         Line1: k.Line1,
                         Line2: k.Line2,
                         Translation: k.Translation,
-                        mk: { explanation: k.mk?.explanation || k.explanation || '' }
+                        mk: { explanation: k.mk?.explanation || k.Translation || '' }
                     },
-                    chapter: { name: k.chapterGroup || k.section || '', tamil: k.chapterGroupTa || '' },
-                    athikaram: k.Chapter || '',
-                    athikaram_tamil: k.ChapterTa || ''
+                    chapter: { name: k.section || '', tamil: k.sectionTa || '' },
+                    athikaram: k.chapter || '',
+                    athikaram_tamil: k.chapterTa || ''
                 };
-                cache[num] = shaped;
-                return shaped;
-            } catch(e) {
+                return cache[num];
+            } catch (e) {
                 console.error(e);
                 return null;
             }
@@ -697,28 +691,45 @@
             });
         }
 
-        function navigate(dir) { load(currentNum + dir); }
+        function navigate(dir) {
+            load(currentNum + dir);
+        }
 
         function getCurrentText() {
-            const d = cache[currentNum]; if (!d) return '';
+            const d = cache[currentNum];
+            if (!d) return '';
             const f = extract(d);
             return `Thirukkural ${f.number} — ${f.chapter}\n\n${f.line1}\n${f.line2}\n\n${f.verse}\n\n${f.meaning}\n\n— Thiruvalluvar`;
         }
 
         function copyKural() {
-            const t = getCurrentText(); if (!t) return;
+            const t = getCurrentText();
+            if (!t) return;
             navigator.clipboard.writeText(t).then(() => toast('Copied ✦'));
         }
 
         async function shareKural() {
-            const t = getCurrentText(); if (!t) return;
-            if (navigator.share) { try { await navigator.share({ title: `Thirukkural ${currentNum}`, text: t }); } catch (_) { } }
-            else copyKural();
+            const t = getCurrentText();
+            if (!t) return;
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: `Thirukkural ${currentNum}`, text: t });
+                } catch (_) {
+                }
+            } else {
+                copyKural();
+            }
         }
 
         function askNotification() {
-            if (Notification.permission === 'granted') { toast('Reminders already on ✦'); return; }
-            if (Notification.permission === 'denied') { toast('Enable notifications in browser settings'); return; }
+            if (Notification.permission === 'granted') {
+                toast('Reminders already on ✦');
+                return;
+            }
+            if (Notification.permission === 'denied') {
+                toast('Enable notifications in browser settings');
+                return;
+            }
             document.getElementById('notifBanner').classList.remove('hidden');
         }
 
@@ -729,7 +740,9 @@
                 document.getElementById('notifBtn').classList.add('active');
                 toast('Daily reminder enabled ✦');
                 setTimeout(() => new Notification('Thirukkural Daily', { body: "You're all set — your morning kural awaits each day.", icon: 'icons/icon-192.png' }), 1000);
-            } else { toast('Permission denied'); }
+            } else {
+                toast('Permission denied');
+            }
         }
 
         function dismissNotifBanner() {
