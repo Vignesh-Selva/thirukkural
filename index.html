@@ -579,37 +579,35 @@
         }
 
         let allKurals = null;
-
+        
         async function fetchKural(num) {
-            if (cache[num]) return cache[num];
-            try {
-                if (!allKurals) {
-                    const res = await fetch('https://raw.githubusercontent.com/tk120404/thirukkural/master/thirukkural.json');
-                    allKurals = await res.json();
-                }
-
-                const k = allKurals[num - 1];
-                if (!k) return null;
-
-                cache[num] = {
-                    kural: {
-                        Number: k.Number,
-                        Line1: k.Line1,
-                        Line2: k.Line2,
-                        Translation: k.Translation,
-                        mk: { explanation: k.mk?.explanation || k.Translation || '' }
-                    },
-                    chapter: { name: k.section || '', tamil: k.sectionTa || '' },
-                    athikaram: k.chapter || '',
-                    athikaram_tamil: k.chapterTa || ''
-                };
-                return cache[num];
-            } catch (e) {
-                console.error(e);
-                return null;
+          if (cache[num]) return cache[num];
+          try {
+            if (!allKurals) {
+              const res = await fetch('kurals.json');
+              const data = await res.json();
+              allKurals = data.kural;
             }
+            const k = allKurals[num - 1];
+            if (!k) return null;
+            cache[num] = {
+              kural: {
+                Number: k.Number,
+                Line1: k.Line1,
+                Line2: k.Line2,
+                Translation: k.couplet || k.Translation,
+                mk: { explanation: k.explanation || k.mk || k.Translation }
+              },
+              chapter: { name: '', tamil: '' },
+              athikaram: '',
+              athikaram_tamil: ''
+            };
+            return cache[num];
+          } catch(e) {
+            console.error(e);
+            return null;
+          }
         }
-
         function extract(data) {
             if (data?.kural) {
                 const k = data.kural;
