@@ -754,28 +754,29 @@
             return null;
           }
         }
+
         function extract(data) {
-            if (data?.kural) {
-                const k = data.kural;
-                return {
-                    number: k.Number || k.number,
-                    chapter: data.chapter?.name || data.athikaram || '',
-                    chapterTa: data.chapter?.tamil || data.athikaram_tamil || '',
-                    line1: k.Line1 || k.line1 || '',
-                    line2: k.Line2 || k.line2 || '',
-                    verse: k.transliteration || k.Translation || k.translation || '',
-                    meaning: k.mk?.explanation || k.explanation || k.Translation || k.translation || ''
-                };
-            }
+          if (data?.kural) {
+            const k = data.kural;
             return {
-                number: data.number || 0,
-                chapter: data.athikaram || '',
-                chapterTa: data.athikaram_tamil || '',
-                line1: data.line1 || '',
-                line2: data.line2 || '',
-                verse: data.transliteration || data.translation || '',
-                meaning: data.explanation || data.translation || ''
+              number:    k.Number || k.number,
+              chapter:   data.chapter?.name || data.athikaram || '',
+              chapterTa: data.chapter?.tamil || data.athikaram_tamil || '',
+              line1:     k.Line1 || k.line1 || '',
+              line2:     k.Line2 || k.line2 || '',
+              verse:     k.Translation || k.translation || '',
+              meaning:   k.mk?.explanation || k.explanation || k.Translation || ''
             };
+          }
+          return {
+            number:    data.number || 0,
+            chapter:   data.athikaram || '',
+            chapterTa: data.athikaram_tamil || '',
+            line1:     data.line1 || '',
+            line2:     data.line2 || '',
+            verse:     data.translation || '',
+            meaning:   data.explanation || data.translation || ''
+          };
         }
 
         function esc(s) {
